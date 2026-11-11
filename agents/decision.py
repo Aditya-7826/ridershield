@@ -52,7 +52,7 @@ def apply_rules(state: ClaimState, deps: Deps) -> tuple[str, list[str]]:
         photo = vision.get("metadata") or ev.get("photo") or {}
         if photo.get("reused"):
             rules.append("the photo matches a previously submitted photo")
-        if vision.get("content_checked") and not vision.get("matches_claim", True):
+        if vision.get("content_checked") and vision.get("content_risk", 0) >= 0.6:
             rules.append("the photo does not show the claimed situation")
         cap = int(ev["policy"]["max_claims_per_week"])
         if ev["rider"]["claims_last_7d"] >= cap:

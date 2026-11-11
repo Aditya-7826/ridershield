@@ -93,6 +93,16 @@ class OllamaClient:
             pass
 
 
+class OfflineLLM:
+    """Always fails, so every agent uses its deterministic fallback (no Ollama needed)."""
+
+    def chat_json(self, *args, **kwargs):
+        raise LLMError("LLM disabled")
+
+    def unload(self, model: str) -> None:
+        pass
+
+
 def to_json(obj) -> str:
     """Compact JSON for prompts."""
     return json.dumps(obj, default=str, separators=(",", ":"))
