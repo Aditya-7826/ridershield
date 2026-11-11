@@ -183,6 +183,8 @@ python scripts/start.py            # add --no-llm to run without Ollama
 
 The app is the Streamlit UI at **http://localhost:8501**. The API on port 8000 has no page of its own: http://localhost:8000 redirects to its docs. Press Ctrl+C to stop both.
 
+The launcher binds both servers to `localhost`, so the app is only reachable from your own machine. There is no login, so don't expose it on a network. Other options: `--no-browser`, `--api-port`, `--ui-port`.
+
 Prefer separate processes? Run each in **its own terminal** (venv active in both). `uvicorn` keeps its terminal busy, so a second command pasted into the same terminal never runs:
 
 ```bash
@@ -198,7 +200,7 @@ python -m evals.run --no-llm        # ~3 min: re-runs everything except the LLM 
 python -m evals.run --fresh         # also re-runs the LLM sample from scratch; slow on CPU (see Results)
 ```
 
-On Mac/Linux, `make setup`, `make api`, `make ui`, `make test` and `make eval` wrap the same commands.
+On Mac/Linux, `make setup`, `make start`, `make api`, `make ui`, `make test` and `make eval` wrap the same commands.
 
 ### Command-line alternatives
 
@@ -218,6 +220,7 @@ python scripts/review_claim.py --claim-id <id> --verdict approve --reviewer <you
 - Only one model is loaded at a time: the vision agent unloads the text model first and unloads itself afterwards, and `OLLAMA_KEEP_ALIVE=2m` frees idle models.
 - If Ollama fails with `cudaMalloc failed: out of memory`, your GPU is too small — set `OLLAMA_NUM_GPU=0` in `.env` to run on CPU.
 - Close browsers, chat apps and heavy IDE extensions before using the LLM. On an 8 GB machine, a claim with a photo took about 5 minutes on CPU while swapping; text-only claims about 40–70 seconds.
+- Stop containers from other projects while using RiderShield (`docker ps` to list them, `docker stop <name>`); RiderShield itself only needs `ridershield-postgres`, capped at 512 MB.
 - Docker Desktop's WSL VM keeps file cache it doesn't need. On Windows, `wsl -d docker-desktop sh -c "sync; echo 3 > /proc/sys/vm/drop_caches"` hands it back.
 - Run the evaluation with `--no-llm` for quick numbers; the LLM sample saves after every claim and resumes if interrupted.
 
@@ -257,7 +260,7 @@ ridershield/
 ├── policy/         deterministic payout rules
 ├── ui/             Streamlit rider + reviewer views and API client
 ├── evals/          evaluation runner, metrics, results (summary.md, confusion matrix)
-├── scripts/        health check, seeding, training, risk report, CLI submit/review, fixtures
+├── scripts/        one-command launcher, health check, seeding, training, risk report, CLI submit/review, fixtures
 ├── tests/          pytest suite and small generated test photos
 ├── docker-compose.yml, alembic.ini, requirements.txt, Makefile, .env.example, LICENSE
 ```
