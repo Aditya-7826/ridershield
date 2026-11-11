@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "generated": "2026-11-11 23:40",
+    "n_heldout": 482,
+    "label_counts": "genuine_external: 295, rider_caused: 156, fraudulent: 31",
+    "thresholds": {
+      "auto_approve_below": 0.42,
+      "auto_reject_at_or_above": 0.45
+    },
+    "weights": {
+      "condition_support": 0.3,
+      "claim_inflation": 0.2,
+      "zone_disruption": 0.15,
+      "rider_anomaly": 0.15,
+      "image_check": 0.1,
+      "claim_history": 0.1
+    },
+    "text_model": "qwen2.5:3b"
+  },
+  "metrics": {
+    "rules_only": {
+      "n_claims": 482,
+      "genuine_precision": 0.941,
+      "genuine_recall": 0.861,
+      "genuine_f1": 0.899,
+      "fraud_recall": 0.935,
+      "fraud_auto_rejected": 0.903,
+      "automation_rate": 0.907,
+      "manual_reviews": 45,
+      "auto_decision_error_rate": 0.041,
+      "wrong_auto_approvals": 16,
+      "wrong_auto_rejections": 2
+    },
+    "ml_scoring": {
+      "n_claims": 482,
+      "genuine_precision": 0.997,
+      "genuine_recall": 0.973,
+      "genuine_f1": 0.985,
+      "fraud_recall": 1.0,
+      "fraud_auto_rejected": 0.935,
+      "automation_rate": 0.975,
+      "manual_reviews": 12,
+      "auto_decision_error_rate": 0.006,
+      "wrong_auto_approvals": 1,
+      "wrong_auto_rejections": 2
+    },
+    "full_fallback": {
+      "n_claims": 482,
+      "genuine_precision": 0.993,
+      "genuine_recall": 0.973,
+      "genuine_f1": 0.983,
+      "fraud_recall": 1.0,
+      "fraud_auto_rejected": 0.935,
+      "automation_rate": 0.973,
+      "manual_reviews": 13,
+      "auto_decision_error_rate": 0.006,
+      "wrong_auto_approvals": 2,
+      "wrong_auto_rejections": 1
+    },
+    "full_llm": {
+      "n_claims": 90,
+      "genuine_precision": 1.0,
+      "genuine_recall": 0.967,
+      "genuine_f1": 0.983,
+      "fraud_recall": 1.0,
+      "fraud_auto_rejected": 0.967,
+      "automation_rate": 0.989,
+      "manual_reviews": 1,
+      "auto_decision_error_rate": 0.011,
+      "wrong_auto_approvals": 0,
+      "wrong_auto_rejections": 1
+    }
+  },
+  "llm_intake": {
+    "n": 90,
+    "sec_per_claim": 13.918046110000002,
+    "delivery_ok": 1.0,
+    "reason_ok": 0.9444444444444444,
+    "delay_ok": 1.0,
+    "regex_filled": 0.9111111111111111,
+    "regex_filled_delivery": 0.8444444444444444,
+    "regex_filled_delay": 0.3888888888888889,
+    "reason_errors": {
+      "flooding -> heavy_rain": 5
+    },
+    "fallbacks": 0,
+    "fb_delivery_ok": 1.0,
+    "fb_reason_ok": 1.0,
+    "fb_delay_ok": 1.0,
+    "per_label": 30
+  }
+}

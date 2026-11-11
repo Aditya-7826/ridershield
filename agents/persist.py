@@ -21,6 +21,8 @@ def persist_decision(state: ClaimState, deps: Deps) -> dict:
         "errors": state.get("errors", []),
     }
     status = STATUS[d["decision"]]
+    if deps.dry_run:
+        return {"status": status}
     with deps.engine.begin() as conn:
         conn.execute(text("""
             INSERT INTO decisions (claim_id, decision, risk_score, breakdown, explanation)

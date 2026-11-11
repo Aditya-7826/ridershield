@@ -143,6 +143,8 @@ def decision_node(state: ClaimState, deps: Deps) -> dict:
     errors = list(state.get("errors", []))
     numbered = "\n".join(f"{i}. {f}" for i, f in enumerate(facts, start=1))
     try:
+        if not getattr(deps, "llm_explanations", True):
+            raise LLMError("LLM explanations disabled")
         out = deps.llm.chat_json(TEXT_MODEL, SYSTEM, f"Facts:\n{numbered}", Explanation)
         cited = [i for i in out.facts_cited if 1 <= i <= len(facts)]
         if _contradicts(out.explanation, decision) or not cited:

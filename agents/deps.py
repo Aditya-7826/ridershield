@@ -15,3 +15,7 @@ class Deps:
     llm: JsonLLM
     models: Models
     use_vision: bool = True
+    # Evaluation mode: run every agent but write nothing to the database.
+    dry_run: bool = False
+    # Use the LLM for explanations (the decision itself never depends on it).
+    llm_explanations: bool = True

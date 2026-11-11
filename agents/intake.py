@@ -42,7 +42,7 @@ def fallback_intake(text: str) -> IntakeResult:
     """Keyword/regex extraction used when the LLM is unavailable or fails."""
     low = text.lower()
     m_id = re.search(r"(?:order|delivery)\s*(?:#|no\.?|number)?\s*#?(\d{1,7})", low)
-    m_min = re.search(r"(\d{1,3})\s*(?:min|mins|minutes)\b", low)
+    m_min = re.search(r"(\d{1,3})\s*-?\s*(?:min|mins|minute|minutes)\b", low)
     m_time = re.search(r"\b([01]?\d|2[0-3])[:.]([0-5]\d)\b", low)
     reason = next((cat for cat, words in KEYWORDS if any(w in low for w in words)), "other")
     return IntakeResult(

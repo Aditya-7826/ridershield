@@ -67,8 +67,9 @@ def vision_node(state: ClaimState, deps: Deps) -> dict:
             errors.append(f"vision: {exc}; used metadata checks only")
         finally:
             deps.llm.unload(VISION_MODEL)
-    with deps.engine.begin() as conn:
-        conn.execute(text("UPDATE claim_evidence SET vision_result = CAST(:v AS JSONB) "
-                          "WHERE claim_id = :c AND kind = 'photo'"),
-                     {"v": json.dumps(vision, default=str), "c": int(state["claim_id"])})
+    if not deps.dry_run:
+        with deps.engine.begin() as conn:
+            conn.execute(text("UPDATE claim_evidence SET vision_result = CAST(:v AS JSONB) "
+                              "WHERE claim_id = :c AND kind = 'photo'"),
+                         {"v": json.dumps(vision, default=str), "c": int(state["claim_id"])})
     return {"vision": vision, "errors": errors}

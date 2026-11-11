@@ -50,6 +50,8 @@ def test_payout_negative_observed_delay():
     ("Road near Bellandur was flooded, order #45210 was 40 min late", 45210, 40, "flooding"),
     ("Sir road near BTM water logging very bad. Order no 43099 got late around 25 minutes", 43099, 25, "flooding"),
     ("Massive traffic jam, delivery 512 delayed by 18 minutes", 512, 18, "traffic_jam"),
+    ("Barricades on the usual route, long detour. 24 minute delay on order 45510.", 45510, 24, "road_closure"),
+    ("Order 77 was a 30-min delay due to rain", 77, 30, "heavy_rain"),
     ("Restaurant took very long to give the order. Waited a lot.", None, None, "restaurant_delay"),
     ("Police had blocked the road, long detour", None, None, "road_closure"),
     ("Pouring rain today", None, None, "heavy_rain"),

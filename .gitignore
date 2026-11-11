@@ -33,3 +33,6 @@ pgdata/
 Thumbs.db
 .vscode/
 .idea/
+
+# Logs
+*.log
