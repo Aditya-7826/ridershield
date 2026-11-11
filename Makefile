@@ -3,7 +3,7 @@
 
 PY ?= python
 
-.PHONY: help install up down health migrate seed train report api ui test eval eval-quick fixtures setup
+.PHONY: help start install up down health migrate seed train report api ui test eval eval-quick fixtures setup
 
 help:
 	@echo "setup      install deps, start Postgres, migrate, seed, train (one-time)"
@@ -35,6 +35,9 @@ train:
 
 report:
 	$(PY) scripts/risk_report.py
+
+start:
+	$(PY) scripts/start.py
 
 api:
 	uvicorn app.main:create_app --factory --port 8000

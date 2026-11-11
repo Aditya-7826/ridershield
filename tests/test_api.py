@@ -57,6 +57,12 @@ def test_health(client):
     assert body["database"] is True and body["status"] == "ok"
 
 
+def test_root_redirects_to_docs(client):
+    c, _ = client
+    r = c.get("/", follow_redirects=False)
+    assert r.status_code in (302, 307) and r.headers["location"] == "/docs"
+
+
 def test_submit_with_photo_then_reused_photo_goes_to_review_and_is_approved(client, tmp_path):
     c, engine = client
     a, b = _flood_deliveries(engine, 2)

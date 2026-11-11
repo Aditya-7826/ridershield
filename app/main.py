@@ -24,7 +24,7 @@ import httpx
 import pandas as pd
 from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy import text
 
@@ -65,6 +65,11 @@ def create_app(deps: Deps | None = None, checkpoint_path: Path | None = None) ->
     app = FastAPI(title="RiderShield API", version="1.0",
                   description="AI micro-insurance for gig delivery riders (local models only).")
     app.state.processor = processor
+
+    @app.get("/", include_in_schema=False)
+    def root():
+        # The user-facing app is the Streamlit UI (port 8501); here, show the API docs.
+        return RedirectResponse("/docs")
 
     # ------------------------------------------------------------------ claims
     @app.post("/claims", status_code=202)

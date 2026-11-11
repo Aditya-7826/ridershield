@@ -173,20 +173,22 @@ python scripts/train.py --model all # ~1 min: ETA model, zone detector, anomaly 
 python scripts/risk_report.py       # optional: how the risk score separates the labels
 ```
 
-### 5. Start the API and the UI (two terminals, venv active in both)
+### 5. Start the app
+
+One command starts both the API and the UI and opens the browser:
 
 ```bash
-uvicorn app.main:create_app --factory --port 8000
+python scripts/start.py            # add --no-llm to run without Ollama
 ```
+
+The app is the Streamlit UI at **http://localhost:8501**. The API on port 8000 has no page of its own: http://localhost:8000 redirects to its docs. Press Ctrl+C to stop both.
+
+Prefer separate processes? Run each in **its own terminal** (venv active in both). `uvicorn` keeps its terminal busy, so a second command pasted into the same terminal never runs:
 
 ```bash
-streamlit run ui/app.py
+uvicorn app.main:create_app --factory --port 8000     # terminal 1
+streamlit run ui/app.py                               # terminal 2
 ```
-
-Open http://localhost:8501. API docs are at http://localhost:8000/docs.
-
-No Ollama handy? Start the API with the deterministic fallbacks instead:
-`USE_LLM=0 uvicorn app.main:create_app --factory --port 8000` (PowerShell: `$env:USE_LLM="0"; uvicorn ...`).
 
 ### 6. Tests and evaluation
 
@@ -230,6 +232,7 @@ python scripts/review_claim.py --claim-id <id> --verdict approve --reviewer <you
 | port 5433 already in use | change `POSTGRES_PORT` in `.env`, then `docker compose up -d` again |
 | `ETA model not found` | run `python scripts/train.py --model all` |
 | claims stay "pending" in the UI | the LLM is still working on CPU — wait and press Refresh; check the API terminal for errors |
+| http://localhost:8000 shows `{"detail":"Not Found"}` or nothing loads | the app is the UI on port **8501**; make sure Streamlit is running (`python scripts/start.py` starts both) |
 
 ## Example claims to try
 
