@@ -1,0 +1,14 @@
+# Pinned to the versions actually installed and tested.
+# Each phase adds the libraries it needs.
+
+# Database
+psycopg[binary]==3.3.8
+
+# HTTP (Ollama, Open-Meteo)
+httpx==0.28.1
+
+# Config
+python-dotenv==1.2.4
+
+# Testing
+pytest==9.2.0

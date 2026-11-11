@@ -1,0 +1,35 @@
+# Local-only assistant/planning files
+CLAUDE.md
+PLAN.md
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# Secrets
+.env
+
+# Generated data, models, uploads, DB state
+data/generated/
+data/cache/
+ml/artifacts/
+uploads/
+checkpoints/
+*.sqlite
+*.db
+pgdata/
+
+# Large model files (small ones may be committed deliberately)
+*.joblib
+*.pkl
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
