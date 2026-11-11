@@ -192,8 +192,8 @@ No Ollama handy? Start the API with the deterministic fallbacks instead:
 
 ```bash
 python -m pytest -q                 # unit + integration tests (DB tests are skipped without the seeded database)
-python -m evals.run --no-llm        # ~3 min: all configurations except the LLM sample
-python -m evals.run                 # adds the LLM sample; slow on CPU (see Results)
+python -m evals.run --no-llm        # ~3 min: re-runs everything except the LLM sample (reuses its saved results)
+python -m evals.run --fresh         # also re-runs the LLM sample from scratch; slow on CPU (see Results)
 ```
 
 On Mac/Linux, `make setup`, `make api`, `make ui`, `make test` and `make eval` wrap the same commands.

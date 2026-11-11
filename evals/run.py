@@ -315,10 +315,20 @@ def main() -> int:
     results["full_fallback"].to_csv(RESULTS / "full_fallback_claims.csv", index=False)
 
     llm_intake = None
-    if args.no_llm:
-        print("Skipping LLM sample (--no-llm)")
-    elif not ollama_up():
-        print("Ollama is not reachable: skipping LLM sample")
+    skip_reason = "--no-llm" if args.no_llm else (None if ollama_up() else "Ollama is not reachable")
+    if skip_reason:
+        if LLM_CSV.exists() and not args.fresh:
+            # Keep the committed LLM results instead of silently dropping them from the summary.
+            saved_llm = pd.read_csv(LLM_CSV)
+            saved_meta = json.loads((RESULTS / "metrics.json").read_text(encoding="utf-8")) \
+                if (RESULTS / "metrics.json").exists() else {}
+            prev = saved_meta.get("llm_intake") or {}
+            results["full_llm"] = saved_llm
+            llm_intake = intake_accuracy(saved_llm, results["full_fallback"], prev.get("sec_per_claim", float("nan")))
+            llm_intake["per_label"] = prev.get("per_label", args.llm_sample)
+            print(f"{skip_reason}: reusing saved LLM results from {LLM_CSV.name} ({len(saved_llm)} claims)")
+        else:
+            print(f"{skip_reason}: skipping LLM sample")
     else:
         if args.fresh and LLM_CSV.exists():
             LLM_CSV.unlink()

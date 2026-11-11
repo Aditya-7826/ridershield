@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-11-11 23:40",
+    "generated": "2026-11-11 23:52",
     "n_heldout": 482,
     "label_counts": "genuine_external: 295, rider_caused: 156, fraudulent: 31",
     "thresholds": {
