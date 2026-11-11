@@ -1,0 +1,41 @@
+# RiderShield risk score configuration.
+#
+# The risk score is a weighted average of signals. Every signal is between
+# 0 and 1, where 0 = "looks like a genuine external delay" and
+# 1 = "looks rider-caused or fraudulent". If a signal is unavailable (e.g. no
+# photo was attached) it is skipped and the remaining weights are rescaled to
+# sum to 1, so riders are not penalised for missing optional evidence.
+
+[weights]
+# Share of the observed delay that conditions + restaurant wait do NOT explain.
+# Uses the ETA model: explained = ETA(actual conditions) - ETA(normal day).
+condition_support = 0.30
+# How much the claimed delay exceeds the delay that really happened.
+claim_inflation = 0.20
+# 1 - zone disruption score: were other riders in the zone delayed too?
+zone_disruption = 0.15
+# Isolation Forest percentile of the rider's behaviour (idle time, claim rate...).
+rider_anomaly = 0.15
+# Photo checks: reuse (perceptual hash), EXIF time/GPS mismatch, vision model.
+image_check = 0.10
+# How many claims the rider filed in the previous 30 days.
+claim_history = 0.10
+
+[params]
+# Minutes of delay noise we never hold against anyone.
+tolerance_minutes = 5.0
+# Restaurant waits above this many minutes count as an external cause.
+normal_restaurant_wait_minutes = 4.0
+# Zone signal when there are too few deliveries in the window to judge.
+zone_neutral_value = 0.5
+# Claims in the previous 30 days that map to the maximum history signal.
+claim_history_saturation = 6
+
+[thresholds]
+# Used by the decision agent. score < auto_approve_below -> auto_approve,
+# score >= auto_reject_at_or_above -> auto_reject, anything else -> human_review.
+# Calibrated on TRAINING-period claims with `python scripts/risk_report.py --calibrate`:
+# at most 2% of auto-approvals non-genuine, at most 1% of auto-rejections genuine
+# (wrongly rejecting a rider is treated as the worse mistake).
+auto_approve_below = 0.42
+auto_reject_at_or_above = 0.45

@@ -3,6 +3,7 @@
 Usage:
     python scripts/train.py --model eta     # XGBoost ETA regression
     python scripts/train.py --model zone    # zone disruption baselines (needs the ETA model)
+    python scripts/train.py --model anomaly # Isolation Forest on rider behaviour
     python scripts/train.py --model all
 
 Data comes from PostgreSQL (run scripts/seed_db.py first). The split is by
@@ -27,9 +28,11 @@ from ml.eta import XGB_PARAMS, EtaModel  # noqa: E402
 from ml.features import ETA_FEATURES, load_delivery_frame  # noqa: E402
 from ml.model_card import md_table, write_model_card  # noqa: E402
 from ml.zone_disruption import ZoneDisruptionDetector, is_delayed  # noqa: E402
+from ml.anomaly import MIN_DELIVERIES, RIDER_FEATURES, RiderAnomalyModel, rider_feature_table  # noqa: E402
 
 ETA_PATH = ARTIFACTS_DIR / "eta_model.joblib"
 ZONE_PATH = ARTIFACTS_DIR / "zone_detector.joblib"
+ANOMALY_PATH = ARTIFACTS_DIR / "rider_anomaly.joblib"
 MAJOR_EVENTS = ["flood", "heavy_rain", "traffic_jam", "road_closure"]
 
 
@@ -167,9 +170,53 @@ def train_zone(frame: pd.DataFrame) -> ZoneDisruptionDetector:
     return det
 
 
+# --------------------------------------------------------------------------- rider anomaly
+
+
+def train_anomaly(frame: pd.DataFrame) -> RiderAnomalyModel:
+    from sqlalchemy import text
+
+    with get_engine().connect() as conn:
+        claims = pd.read_sql(text("SELECT id, rider_id, submitted_at FROM claims"), conn, parse_dates=["submitted_at"])
+    feats = rider_feature_table(frame, claims, TRAIN_CUTOFF)
+    model = RiderAnomalyModel().fit(feats)
+    feats["anomaly_pct"] = model.score(feats)
+    model.save(ANOMALY_PATH)
+
+    used = feats[feats["n_deliveries"] >= MIN_DELIVERIES]
+    summary = used[RIDER_FEATURES + ["anomaly_pct"]].describe(percentiles=[0.5, 0.9]).T[["mean", "50%", "90%", "max"]]
+    summary = summary.reset_index().rename(columns={"index": "feature", "50%": "median", "90%": "p90"})
+    top = used.sort_values("anomaly_pct", ascending=False).head(5)
+    top_notes = [f"rider {rid}: pct {r['anomaly_pct']:.2f}; " + "; ".join(model.explain(r) or ["no single extreme feature"])
+                 for rid, r in top.iterrows()]
+
+    print(f"\n== Rider anomaly model: {len(used)} riders with >= {MIN_DELIVERIES} deliveries before {TRAIN_CUTOFF:%Y-%m-%d} ==")
+    print(summary.to_string(index=False, float_format=lambda v: f"{v:.3f}"))
+    print("Most unusual riders:")
+    for line in top_notes:
+        print("  " + line)
+
+    card = write_model_card("rider_anomaly", "Rider behaviour anomaly detector (Isolation Forest)", {
+        "Purpose": "Score how unusual a rider's behaviour is compared with other riders. One input to the risk "
+                   "score; never used alone to reject a claim.",
+        "Features": "\n".join(f"- `{f}`" for f in RIDER_FEATURES),
+        "Training data": f"{len(used)} riders with at least {MIN_DELIVERIES} deliveries before "
+                         f"{TRAIN_CUTOFF:%Y-%m-%d}. Riders with less history get a neutral 0.5.",
+        "Model": "`IsolationForest(n_estimators=200, contamination='auto', random_state=42)`. The raw score is "
+                 "converted to a percentile among training riders (0.97 = more unusual than 97% of riders).",
+        "Feature summary (training riders)": md_table(summary),
+        "Most unusual training riders": "\n".join(f"- {n}" for n in top_notes),
+        "Limitations and fairness": "Unusual is not dishonest: new riders, riders in slow zones or riders on "
+                                    "slower vehicles can look different for innocent reasons. That is why the "
+                                    "weight is modest and borderline cases go to a human.",
+    })
+    print(f"\nSaved {ANOMALY_PATH.relative_to(ARTIFACTS_DIR.parents[1])} and {Path(card).name}")
+    return model
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--model", choices=["eta", "zone", "all"], required=True)
+    parser.add_argument("--model", choices=["eta", "zone", "anomaly", "all"], required=True)
     args = parser.parse_args()
 
     frame = load_delivery_frame(get_engine())
@@ -179,6 +226,8 @@ def main() -> int:
         train_eta(frame)
     if args.model in ("zone", "all"):
         train_zone(frame)
+    if args.model in ("anomaly", "all"):
+        train_anomaly(frame)
     return 0
 
 
