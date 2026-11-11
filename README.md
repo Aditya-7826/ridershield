@@ -15,6 +15,8 @@ docker compose up -d
 ollama pull qwen2.5:3b
 ollama pull qwen2.5vl:3b
 python scripts/health_check.py
+alembic upgrade head          # create tables
+python scripts/seed_db.py     # synthetic riders, deliveries, conditions and labelled claims
 ```
 
 A full README with architecture, results and run instructions will follow.

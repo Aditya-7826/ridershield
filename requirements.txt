@@ -3,6 +3,12 @@
 
 # Database
 psycopg[binary]==3.3.8
+SQLAlchemy==2.1.8
+alembic==1.20.1
+
+# Data
+numpy==2.5.4
+pandas==3.1.1
 
 # HTTP (Ollama, Open-Meteo)
 httpx==0.28.1
