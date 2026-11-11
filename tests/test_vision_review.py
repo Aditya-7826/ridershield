@@ -113,14 +113,24 @@ def _submit(engine, row, claim_text, photo, upload_dir):
     return claim_id
 
 
+def _unique_image(seed: int) -> Image.Image:
+    """A random block pattern: its perceptual hash will not match any earlier upload."""
+    import numpy as np
+    rng = np.random.default_rng(seed)
+    blocks = rng.integers(0, 256, (8, 12, 3), dtype=np.uint8)
+    return Image.fromarray(blocks).resize((480, 320), Image.NEAREST)
+
+
 @requires_db
 @requires_models
 def test_genuine_photo_passes_metadata_and_vision(env):
+    import time
+
     from agents.graph import process_claim
     engine, tmp = env
     (a,) = _flood_deliveries(engine, 1)
-    photo = tmp / "a.jpg"   # same picture, EXIF set to the delivery time and zone
-    write_exif(Image.open(FIXTURES / "flooded_road.jpg"), photo,
+    photo = tmp / "a.jpg"   # a never-seen photo with EXIF set to the delivery time and zone
+    write_exif(_unique_image(time.time_ns() % 2**32), photo,
                (pd.Timestamp(a.picked_up_at) + timedelta(minutes=10)).to_pydatetime(), (a.lat, a.lon))
     claim_id = _submit(engine, a, f"Road flooded, order {a.id} 20 min late", photo, tmp / "up")
     llm = FakeLLM(intake=IntakeResult(reason_category="flooding", summary="flood"),

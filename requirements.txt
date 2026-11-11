@@ -24,6 +24,12 @@ pydantic==2.14.3
 pillow==13.0.0
 ImageHash==4.3.2
 
+# API + UI
+fastapi==0.162.4
+uvicorn[standard]==0.54.0
+python-multipart==0.0.33
+streamlit==1.67.0
+
 # HTTP (Ollama, Open-Meteo)
 httpx==0.28.1
 
