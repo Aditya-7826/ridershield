@@ -163,7 +163,7 @@ class Decision(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     claim_id: Mapped[int] = mapped_column(ForeignKey("claims.id"), index=True)
     decision: Mapped[str] = mapped_column(String(16))
-    risk_score: Mapped[float] = mapped_column(Float)
+    risk_score: Mapped[float | None] = mapped_column(Float, comment="NULL when no evidence was available")
     breakdown: Mapped[dict] = mapped_column(JSONB, comment="per-signal contributions to the risk score")
     explanation: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
