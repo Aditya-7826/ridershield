@@ -10,6 +10,11 @@ alembic==1.20.1
 numpy==2.5.4
 pandas==3.1.1
 
+# ML
+xgboost==3.4.1
+scikit-learn==1.9.1
+joblib==1.6.0
+
 # HTTP (Ollama, Open-Meteo)
 httpx==0.28.1
 
